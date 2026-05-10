@@ -1,447 +1,489 @@
-# 14 ready-to-paste prompts for Devin sessions
+# 10 ready-to-paste prompts for Devin sessions
 
-Each prompt below is **complete and self-contained**. Open a new Devin session, paste the prompt, hit Enter. The session will read the repo, find its module, and start working.
+This is the new **10-session structure**: 1 TEAM LEAD + 9 workers.
 
-**Project lead:** copy each prompt into a different Devin account / session. There are 14 prompts; you have 14 accounts. 1:1 mapping.
+Open 10 Devin sessions (one per Devin account). Paste the matching prompt into each. Done.
+
+If you have **fewer than 10 accounts right now** — start with the most important ones first:
+1. **TEAM LEAD** (always start this first — it's your right hand)
+2. **Devin-1 Core+Network** (everyone else depends on it)
+3. **Devin-6 World+Map** (no game without rooms)
+4. **Devin-2 Director** (high impact)
+5. **Devin-3 Player** (high impact)
+6. Then 4, 5, 7, 8, 9 in any order
+
+If you have **more than 10 accounts** — see the "Splitting big tasks" section at the bottom.
 
 ---
 
-## SHARED PREAMBLE (already inlined into each prompt below)
+## ⭐ Prompt L — TEAM LEAD (run this FIRST, keep it running)
 
-> You are part of a 14-session parallel team building DIRECTOR — a 1v4 asymmetric PvP horror game in Godot 4. Repo: `https://github.com/director-game-studio-with-chat-gpt/director-game`. Always read `AGENTS.md` and `docs/GDD.md` and `docs/architecture.md` before starting. Coordinate ONLY through GitHub (Issues, PRs, files in `/docs/`). The project lead is `@plpla7386-web` on GitHub.
+```
+You are the TEAM LEAD for the DIRECTOR game project. You are special — you do NOT work on a specific module. Your job is to coordinate and review the other 9 Devin workers.
+
+Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
+
+Read first: AGENTS.md, docs/GDD.md, docs/architecture.md, docs/team.md
+
+YOUR DUTIES (loop forever until told to stop):
+
+1. Every 30 minutes: pull latest. Check GitHub for new Pull Requests targeting `dev`.
+
+2. For each open PR, run this review checklist:
+   - Does the branch follow naming convention `devin-N/issue-M-short`?
+   - Does the PR title start with `[#M]`?
+   - Does it only touch files inside the assigned module's folder?
+   - If it changes a public interface in docs/architecture.md, is that doc updated in the SAME PR?
+   - Does CI pass? (check the Actions tab)
+   - Tests added/updated?
+   - No hardcoded secrets?
+   - Code style matches AGENTS.md (snake_case files, typed GDScript, no anys)?
+
+3. Leave review comment:
+   - If ALL checks pass: approve with comment "LGTM — ready to merge. @plpla7386-web"
+   - If issues: list each specific issue with "needs change: X"
+   - If conflict with another PR: explain how to rebase / which order to merge
+
+4. For Issues with label `BLOCKED` or comments starting "BLOCKED:":
+   - Read the blocker
+   - Provide concrete guidance OR
+   - If the blocker requires another module's owner, mention them
+   - If complex, suggest pair work — label the Issue `needs-pair` and ping the second Devin
+
+5. Every 4 hours, update docs/status.md with:
+   - Open PRs (with state)
+   - Merged PRs since last update
+   - Blockers
+   - Recommendations for project lead
+
+6. If the project lead (@plpla7386-web) asks anything in any Issue, respond promptly with your analysis.
+
+Do NOT write feature code yourself — your job is review and coordination. The exception: if you spot a 1-line bug in any module, open an Issue with the fix described, but do not push the code yourself.
+
+NEVER merge PRs to `main` yourself. Only suggest merges to the project lead.
+
+If you have nothing to do for 30 minutes, take a break — check back later. Don't spin.
+
+Begin by reading the 4 docs above, then check repo state and open status.md with current state.
+```
 
 ---
 
-## Prompt 1 — Devin-1 (Engine / Core)
+## Prompt 1 — Devin-1 (Core + Network)
 
 ```
 You are Devin-1 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-1/issue-1-core-bootstrap
+Branch: devin-1/issue-1-core-network
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md, docs/architecture.md, docs/team.md, docs/prompts.md
 
-Your task: Issue #1 — Set up the core game state and autoloads.
+Your task: Issue #1 — Core + Network systems.
 
-Scope (only edit src/core/):
-1. Create src/core/game_state.gd — autoload "GameState" with the public interface from docs/architecture.md
-2. Create src/core/event_bus.gd — autoload "EventBus" with emit() / connect() helpers
-3. Create src/core/scene_loader.gd — handles transitions between lobby and match
-4. Register the autoloads in project.godot
-5. Write basic GUT tests in tests/test_game_state.gd
+This is a HIGH-complexity task because it's foundational. Other workers depend on you. If you need help — tag @team-lead and request a paired session.
 
-When done: open a PR titled "[#1] Core bootstrap — GameState, EventBus, SceneLoader" against dev branch. CI must pass.
+Scope:
 
-If blocked: comment on Issue #1 with "BLOCKED: <reason> @plpla7386-web help".
+A. CORE (src/core/)
+- Expand GameState (src/core/game_state.gd) with full implementation of match phase transitions, role assignment.
+- Expand EventBus (src/core/event_bus.gd) with full event registry, deduplication, debug logging.
+- Add src/core/scene_loader.gd — handles lobby <-> match scene transitions, with fade transition.
+
+B. NETWORK (src/network/)
+- Implement src/network/net.gd (replace the stub) with Godot's high-level MultiplayerAPI + ENet for now.
+- host_match() creates an ENet server, returns lobby_id.
+- join_match(lobby_id) connects as client.
+- send_rpc() and send_to_director() use Godot's @rpc decorator on a network manager node.
+- Handle peer_joined / peer_left correctly.
+- Steam Networking integration is a LATER issue — just use ENet for v1.
+
+C. TESTS (tests/)
+- test_game_state.gd: expand existing tests.
+- test_event_bus.gd: emit/listen/disconnect, no leaks.
+- test_net.gd: mock 1 host + 2 clients, test RPC round-trip.
+
+When done: open PR "[#1] Core + Network systems" → dev branch. Wait for @team-lead review.
+
+If blocked: comment on Issue #1 with "BLOCKED: <reason> @team-lead help".
 ```
 
 ---
 
-## Prompt 2 — Devin-2 (Network / Steam)
+## Prompt 2 — Devin-2 (Director Systems)
 
 ```
 You are Devin-2 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-2/issue-2-multiplayer
+Branch: devin-2/issue-2-director-systems
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md (especially §4 Director gameplay), docs/architecture.md, docs/team.md
 
-Your task: Issue #2 — Set up multiplayer skeleton with Godot's high-level networking.
+Your task: Issue #2 — Complete Director Systems (camera, mana, ALL 8 abilities).
 
-Scope (only edit src/network/):
-1. Create src/network/net.gd — autoload "Net" with public interface from docs/architecture.md
-2. Implement host_match() / join_match() using ENet for now (we'll swap to Steam later)
-3. Set up RPC scaffolding for: Director→Escapist (geometry edits), Escapist→Director (interactions)
-4. Implement peer joined/left signals
-5. Write GUT tests for connection flow with 1 host + 2 clients (mocked)
+This is HIGH complexity. If you find this is too much for one session, tag @team-lead and request a paired worker.
 
-Do NOT integrate Steam yet — that's a separate Issue. Use Godot's MultiplayerAPI.
+Scope (only edit src/director/):
 
-When done: PR "[#2] Multiplayer skeleton with ENet" → dev. CI green.
+A. CORE (src/director/)
+- Expand src/director/director.gd autoload with the full public interface in docs/architecture.md
+- src/director/camera.gd — top-down 3D camera, WASD pan, scroll zoom, click-drag rotate, edge scroll
+- src/director/mana.gd — mana resource (start 100, max 200, regen 5/sec, max-clamped)
+- src/director/ability_dispatcher.gd — registry: ability name → handler. Routes try_use_ability calls.
 
-If blocked: comment "BLOCKED: ... @plpla7386-web help" on Issue #2.
+B. ABILITIES — implement all 8 from GDD §4 table:
+- src/director/walls_doors.gd — Move Wall (5s animated), Open/Close Door, Swap Doors, Create Door
+- src/director/lights_items.gd — Toggle Light (1s flicker), Swap Items
+- src/director/monster_control.gd — Summon Monster, Program Monster Trigger (uses EventBus listener)
+
+All abilities deduct mana, respect cooldowns, emit signals.
+
+For abilities that need World API (move_wall, swap_doors, etc) — call World.* methods. If World doesn't yet implement them, use a stub and add a TODO referencing Issue #6.
+
+C. TESTS
+- test_director_mana.gd: regen, max clamp, deduction on ability use.
+- test_director_cooldowns.gd: each ability respects its cooldown.
+- test_director_abilities.gd: at least 1 test per ability (happy path).
+
+When done: PR "[#2] Director systems — camera, mana, 8 abilities" → dev.
+
+If blocked: comment "BLOCKED: ... @team-lead help" on Issue #2.
 ```
 
 ---
 
-## Prompt 3 — Devin-3 (Director controller / mana / camera)
+## Prompt 3 — Devin-3 (Player + Classes)
 
 ```
 You are Devin-3 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-3/issue-3-director-base
+Branch: devin-3/issue-3-player-classes
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md (especially §5 Escapist gameplay and §6 classes), docs/architecture.md, docs/team.md
 
-Your task: Issue #3 — Implement the Director's top-down camera, mana system, and ability bar UI hooks.
+Your task: Issue #3 — First-person Escapist controller + 4 classes.
 
-Scope (only edit src/director/ root level — NOT walls/doors/lights/items subfolders, those are Devin-4 and Devin-5):
-1. src/director/director.gd — autoload "Director" with public interface
-2. src/director/camera.gd — top-down 3D camera, WASD pan, scroll zoom, click-drag rotate
-3. src/director/mana.gd — mana resource (start 100, max 200, regen 5/sec)
-4. src/director/ability_bar.gd — central dispatcher: ability registered → cooldown tracked → mana deducted → fires signal for the actual ability owner (in walls/doors/etc) to execute
-5. Stub all 8 abilities so they at least "do nothing but consume mana" — actual logic comes from Devin-4 and Devin-5
-6. Tests for mana regen and cooldown
+Scope (only edit src/player/):
 
-When done: PR "[#3] Director base: camera, mana, ability dispatcher" → dev.
+A. ESCAPIST BASE (src/player/)
+- src/player/escapist.gd — Node3D with health, stamina, inventory (3 slots), class_name field
+- src/player/movement.gd — WASD + mouse look, jump, sprint (drains stamina), crouch
+- src/player/flashlight.gd — F to toggle, drains battery, raycast cone for monster detection
+- src/player/interaction.gd — E to interact (2m raycast: Door, Item, Pedestal)
+- src/player/inventory.gd — pick up / drop / use; max 3 slots
+
+B. CLASSES (src/player/classes/)
+- src/player/classes/base_class.gd — abstract
+- src/player/classes/scout.gd — Foresight (3s reveal, 60s CD), knife (5s stun)
+- src/player/classes/locksmith.gd — Anchor (10s edit-disable in 1-room radius, 90s CD), pepper spray (3s range stun)
+- src/player/classes/medic.gd — Patch (revive teammate, 1/teammate/match), taser (4s point-blank stun)
+- src/player/classes/listener.gd — Echo (3x range hearing, passive), salt shaker (Worm/Roach only)
+
+Use EventBus for monster stun events. Stub the actual monster effects — Devin-4/5 implement those.
+
+C. TESTS
+- test_movement.gd: stamina drain, jump, crouch
+- test_inventory.gd: 3-slot limit, drop, use
+- test_classes.gd: 1 test per class ability (cooldown + effect signal)
+
+When done: PR "[#3] Player FP controller + 4 classes" → dev.
 
 If blocked: comment on Issue #3.
 ```
 
 ---
 
-## Prompt 4 — Devin-4 (Walls + Doors)
+## Prompt 4 — Devin-4 (Monsters A: Worm + Mirror + Base)
 
 ```
 You are Devin-4 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-4/issue-4-walls-doors
+Branch: devin-4/issue-4-monsters-a
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md §7, docs/architecture.md, docs/team.md
 
-Your task: Issue #4 — Implement Director abilities: Move Wall, Open/Close Door, Swap Doors, Create New Door.
+Your task: Issue #4 — Base Monster class + Worm + Mirror.
 
-Scope (only edit src/director/walls/ and src/director/doors/):
-1. src/director/walls/wall_mover.gd — handles "Move Wall" ability. Walls slide animated over 5s.
-2. src/director/doors/door_swap.gd — handles "Swap Doors" — swaps "leads_to_room_id" between two doors
-3. src/director/doors/door_creator.gd — handles "Create New Door" — instantiates a Door node in a wall and assigns destination
-4. Visual feedback: walls "slide" with smooth tween, doors visually appear with a brief warp effect
-5. Wire each ability to Director.try_use_ability dispatcher (Devin-3's API)
-6. Tests for swap_doors logic (room A→B, B→A correctness)
+You own src/monsters/base_monster.gd which Devin-5 will also extend. Coordinate via PR comments if you need to talk to Devin-5.
 
-You will need: World.move_wall(), World.swap_doors(), World.create_door() — these are Devin-10's API. If they're not implemented yet, use a stub and add a TODO referencing Issue #10.
+Scope (only edit src/monsters/, BUT only base_monster.gd + worm/ + mirror/):
 
-When done: PR "[#4] Director abilities: walls + doors" → dev.
+A. BASE (src/monsters/base_monster.gd)
+- Abstract BaseMonster extends Node3D with the public interface from docs/architecture.md
+- hp, monster_type, position, target tracking
+- Virtual methods: spawn(), receive_command(), take_damage()
+- Common signals: killed, artifact_stolen
+
+B. WORM (src/monsters/worm/)
+- worm.gd: slow crawler, climbs walls/ceilings (use Godot's NavigationAgent3D + custom path), steals dropped artifacts on contact (subscribes to EventBus "artifact_dropped"), light slows 75%, sustained light kills.
+- worm.tscn: placeholder mesh (long capsule), collider, light-sensitivity raycast.
+
+C. MIRROR (src/monsters/mirror/)
+- mirror.gd: spawns in room, mirrors nearest Escapist's movement (clone Transform3D each frame with slight lag), 1-damage on close approach (2m+3s), dies in 1 hit
+- mirror.tscn: humanoid placeholder
+
+D. TESTS
+- test_worm.gd: Worm steals dropped artifact, dies in light.
+- test_mirror.gd: Mirror mirrors movement, dies in 1 hit.
+
+When done: PR "[#4] Monsters: Base + Worm + Mirror" → dev.
 
 If blocked: comment on Issue #4.
 ```
 
 ---
 
-## Prompt 5 — Devin-5 (Lights + Items)
+## Prompt 5 — Devin-5 (Monsters B: Swarm + Tongue)
 
 ```
 You are Devin-5 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-5/issue-5-lights-items
+Branch: devin-5/issue-5-monsters-b
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md §7, docs/architecture.md, docs/team.md
 
-Your task: Issue #5 — Implement Director abilities: Toggle Lights, Swap Items, Program Monster Trigger.
+Your task: Issue #5 — Swarm + Tongue monsters.
 
-Scope (only edit src/director/lights/ and src/director/items/):
-1. src/director/lights/light_toggle.gd — toggles all OmniLight3D / SpotLight3D in a room. Lights flicker out over 1s.
-2. src/director/items/item_swap.gd — moves an in-world item to a different room
-3. src/director/items/trigger_programmer.gd — sets up a programmable trigger: "When event X happens, monster Y appears." Uses EventBus to register a one-shot listener.
-4. Wire each ability to Director.try_use_ability dispatcher (Devin-3's API)
-5. Tests for trigger_programmer (event fires → monster command issued)
+You rely on src/monsters/base_monster.gd which Devin-4 is writing. If it doesn't exist yet:
+- Open a comment on Issue #4: "@devin-4 I'm starting Issue #5, need BaseMonster ASAP."
+- Continue working with a local stub of BaseMonster — replace with the real one in your PR before merging.
 
-When done: PR "[#5] Director abilities: lights + items + triggers" → dev.
+Scope (only edit src/monsters/, BUT only swarm/ + tongue/):
+
+A. SWARM (src/monsters/swarm/)
+- swarm.gd: fills a room (uses GPUParticles3D), visibility drops to 1m for Escapists inside, dispersed by wind (subscribes to EventBus "window_opened" or "fan_activated")
+- swarm.tscn: GPUParticles3D + room-bounds detector
+
+B. TONGUE (src/monsters/tongue/)
+- tongue.gd: trigger-based. Director programs it: "appear from door X when an Escapist opens it" (uses EventBus "door_opened"). Grabs at 4m range, drags target into door (instant kill).
+- tongue.tscn: long stretchy mesh placeholder + grab collider
+
+C. TESTS
+- test_swarm.gd: visibility drop, wind disperses.
+- test_tongue.gd: triggers on programmed door, grabs at 4m, retracts on knife hit.
+
+When done: PR "[#5] Monsters: Swarm + Tongue" → dev.
 
 If blocked: comment on Issue #5.
 ```
 
 ---
 
-## Prompt 6 — Devin-6 (Player controller / first-person)
+## Prompt 6 — Devin-6 (World + Map 1)
 
 ```
 You are Devin-6 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-6/issue-6-player-controller
+Branch: devin-6/issue-6-world-map
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md (§8 Maps), docs/architecture.md, docs/team.md
 
-Your task: Issue #6 — Implement the first-person Escapist controller (without class abilities — those are Devin-7).
+Your task: Issue #6 — World system + Map 1 "The Childhood Home".
 
-Scope (only edit src/player/ root, NOT src/player/classes/):
-1. src/player/escapist.gd — Node3D root with health, stamina, inventory (3 slots)
-2. src/player/movement.gd — WASD + mouse look, jump, sprint with stamina drain
-3. src/player/flashlight.gd — flashlight with battery
-4. src/player/interaction.gd — E to interact (raycast 2m, find Item / Door / Pedestal)
-5. src/player/inventory.gd — pick up / drop / use slot logic
-6. Tests for stamina drain and inventory limits
+HIGH complexity. If too big for one session, tag @team-lead for a paired worker.
 
-When done: PR "[#6] First-person Escapist controller" → dev.
+Scope (only edit src/world/ and scenes/main/):
+
+A. WORLD (src/world/)
+- Expand src/world/world.gd autoload with the full public interface in docs/architecture.md
+- src/world/room.gd — Node3D with bounding box, list of doors, list of lights, list of items
+- src/world/wall.gd — Node3D, movable flag, animates over duration when moved
+- src/world/door.gd — Node3D, leads_to_room_id property, lock state, can be swapped/created/destroyed
+- src/world/item.gd — pickup-able, type (artifact/key/weapon/consumable), drop interaction
+- src/world/artifact.gd — extends Item, has "is_collected" flag, emits "artifact_picked_up" event
+- src/world/map_loader.gd — loads a map .tscn into the scene, registers rooms/walls/doors with World
+
+B. MAP 1 (scenes/main/)
+- scenes/main/map_1_childhood_home.tscn — 2-floor Victorian, ~12 rooms (use placeholder cubes for walls)
+- Required rooms: Foyer (spawn), Kitchen, Living Room, Bedroom, Bathroom, Cellar, Attic, Garden, Hallway1, Hallway2, Stairwell, Main Exit Room
+- 3 artifact spawn points (random placement among non-spawn rooms)
+- 1 fixed Main Exit door
+
+Use simple geometry. No fancy models. Devin-7's shader gives the visual style.
+
+C. TESTS
+- test_world.gd: swap_doors correctness (A→B, B→A), create_door, move_wall transform interpolation
+- test_map_loader.gd: loads Map 1, has all required rooms
+
+When done: PR "[#6] World system + Map 1 (placeholder geometry)" → dev.
 
 If blocked: comment on Issue #6.
 ```
 
 ---
 
-## Prompt 7 — Devin-7 (Player classes — Scout, Locksmith, Medic, Listener)
+## Prompt 7 — Devin-7 (Shaders + VFX)
 
 ```
 You are Devin-7 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-7/issue-7-player-classes
+Branch: devin-7/issue-7-shaders
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md §9 (Visual style), docs/architecture.md, docs/team.md
 
-Your task: Issue #7 — Implement the 4 Escapist classes and their abilities + combat tools.
+Your task: Issue #7 — Cel-shading + outline + fog visual style.
 
-Scope (only edit src/player/classes/):
-1. src/player/classes/base_class.gd — abstract base
-2. src/player/classes/scout.gd — Foresight (3s map reveal, 60s cooldown), knife combat tool
-3. src/player/classes/locksmith.gd — Anchor (10s edit-disable in 1-room radius, 90s cooldown), pepper spray
-4. src/player/classes/medic.gd — Patch (revive teammate, 1 use per teammate per match), taser
-5. src/player/classes/listener.gd — Echo (3x range hearing, passive), salt shaker (only stuns Worm + Roach)
-6. Wire abilities to Escapist.use_class_ability()
-7. Tests for cooldowns and ability effects
+References: REPO, PEAK, Inscryption, Lethal Company, Coraline (movie).
 
-You'll need EventBus signals for monster stuns. If not yet defined, use stubs.
+Scope (only edit src/shaders/):
 
-When done: PR "[#7] Escapist classes: Scout, Locksmith, Medic, Listener" → dev.
+A. CEL-SHADING (src/shaders/cel_shading.gdshader)
+- Toon shader: hard light/shadow threshold
+- 2-level shading (light/shadow), optional 3-level
+- @export uniform params: shadow_threshold, ambient_color, light_color
+
+B. OUTLINE (src/shaders/outline.gdshader)
+- Post-process screen-space outline (depth-based + normal-based)
+- @export uniform: outline_color (default black), outline_thickness, depth_threshold
+
+C. VOLUMETRIC FOG (src/shaders/volumetric_fog.gdshader)
+- Per-room fog volume with density falloff
+- @export uniform: fog_color, density, height_falloff
+
+D. TEST SCENE (src/shaders/test_scene.tscn)
+- Small 3D scene with placeholder objects to demonstrate all 3 shaders
+- Used as a regression test — visual check that shaders look right
+
+E. DOCUMENTATION
+- Comment block at top of each .gdshader explaining each uniform
+- Add screenshots to docs/shaders.md (you create this file)
+
+F. TESTS
+- Skip — shaders are visually tested via test_scene.tscn
+
+When done: PR "[#7] Cel-shading + outline + fog" → dev. Attach screenshots.
 
 If blocked: comment on Issue #7.
 ```
 
 ---
 
-## Prompt 8 — Devin-8 (Monster: Worm + Mirror)
+## Prompt 8 — Devin-8 (UI: HUD + Lobby + Menu)
 
 ```
 You are Devin-8 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-8/issue-8-monsters-worm-mirror
+Branch: devin-8/issue-8-ui
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md (§4 Director UI, §5 Escapist UI), docs/architecture.md, docs/team.md
 
-Your task: Issue #8 — Implement the Worm and Mirror monsters per the GDD.
+Your task: Issue #8 — All UI scenes: main menu, lobby, in-game HUD.
 
-Scope (only edit src/monsters/worm/ and src/monsters/mirror/):
-1. src/monsters/base_monster.gd — abstract base implementing the Monster interface from architecture.md
-2. src/monsters/worm/worm.gd — slow crawler, climbs walls/ceilings, steals dropped artifacts, weakness: light
-3. src/monsters/worm/worm.tscn — Godot scene with placeholder model (use a free CC0 worm or a long capsule for now)
-4. src/monsters/mirror/mirror.gd — copies nearest Escapist's movements, dread effect on close approach, dies in 1 hit
-5. src/monsters/mirror/mirror.tscn — placeholder scene
-6. Tests: Worm steals dropped artifact, Mirror dies in 1 hit
+Scope (only edit src/ui/):
 
-Use placeholder geometry. Real models come later.
+A. MENU (src/ui/menu/)
+- main_menu.tscn — Play / Settings / Credits / Quit
+- settings.tscn — graphics, audio, controls
+- credits.tscn — placeholder
 
-When done: PR "[#8] Monsters: Worm + Mirror" → dev.
+B. LOBBY (src/ui/lobby/)
+- lobby_browser.tscn — list of lobbies (use Net.list_lobbies stub if needed)
+- lobby_room.tscn — show 5 players, 1 is auto-Director (random), 4 pick class, "Ready" button, "Start" host-only
+
+C. HUD (src/ui/hud/)
+- director_hud.tscn — bottom: mana bar + 8 ability buttons; top-left: monster panel; top: player dots overlay
+- escapist_hud.tscn — bottom: stamina bar, flashlight battery, inventory (3 slots), class CD
+- match_overlay.tscn — match timer, artifact counter, end-of-match scoreboard
+
+Style: dark theme, white text, accent red (Director) / cyan (Escapist). Sans-serif font.
+
+D. TESTS
+- Skip integration tests (UI tested visually). Add basic unit tests for state binding (signals fire UI updates).
+
+When done: PR "[#8] UI: menus + lobby + HUDs" → dev. Attach screenshots.
 
 If blocked: comment on Issue #8.
 ```
 
 ---
 
-## Prompt 9 — Devin-9 (Monster: Swarm + Tongue)
+## Prompt 9 — Devin-9 (Audio + Proximity Chat)
 
 ```
 You are Devin-9 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-9/issue-9-monsters-swarm-tongue
+Branch: devin-9/issue-9-audio
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+Read: AGENTS.md, docs/GDD.md §10 (Audio), docs/architecture.md, docs/team.md
 
-Your task: Issue #9 — Implement the Swarm and Tongue monsters per the GDD.
+Your task: Issue #9 — Audio system + proximity voice chat.
 
-Scope (only edit src/monsters/swarm/ and src/monsters/tongue/):
-1. src/monsters/swarm/swarm.gd — fills a room with low-vis fog particles, dispersed by wind (open window/fan)
-2. src/monsters/swarm/swarm.tscn — uses GPUParticles3D
-3. src/monsters/tongue/tongue.gd — trigger-based monster, spawns from a Director-placed door, grabs at 4m, drags target into door (kill)
-4. src/monsters/tongue/tongue.tscn — placeholder scene
-5. Tests: Swarm clears when wind triggered, Tongue retracts on knife hit
+Scope (only edit src/audio/):
 
-Use placeholder geometry. Real models come later.
+A. AUDIO MANAGER (src/audio/)
+- Expand src/audio/audio.gd autoload with full public interface
+- src/audio/sfx_pool.gd — pooled AudioStreamPlayer3D for SFX (avoid allocation churn)
+- src/audio/music_player.gd — looping ambient music with crossfade between tracks
 
-When done: PR "[#9] Monsters: Swarm + Tongue" → dev.
+B. PROXIMITY CHAT (src/audio/proximity_chat.gd)
+- Capture microphone via AudioServer + AudioEffectCapture
+- Broadcast captured chunks via Net.send_rpc("voice_chunk", [bytes])
+- On peer voice received: decode + play via 3D positioned AudioStreamPlayer3D attached to that peer
+- Falloff: linear up to 5m
+- The Director hears all Escapists at full volume (no falloff)
+- Steam Voice integration is a LATER issue — basic mic capture is enough
+
+C. PLACEHOLDER AUDIO
+- src/assets/audio/music_ambient_1.ogg — single dark drone (download from freesound.org CC0)
+- A few SFX: door_open.ogg, footstep.ogg, monster_growl.ogg (CC0)
+- Document sources in src/assets/SOURCES.md
+
+D. TESTS
+- test_audio.gd: SFX pool doesn't leak, music crossfade works
+- test_proximity_chat.gd: voice falloff at 5m, Director hears all
+
+When done: PR "[#9] Audio + proximity chat (basic)" → dev.
 
 If blocked: comment on Issue #9.
 ```
 
 ---
 
-## Prompt 10 — Devin-10 (World — rooms, walls, doors, items)
+## Splitting big tasks (when you have more accounts later)
 
-```
-You are Devin-10 working on the DIRECTOR game.
+If you get more Devin accounts and want to parallelize harder, here's how to split:
 
-Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-10/issue-10-world
+| Original task | Can be split into |
+|---|---|
+| Devin-1 Core+Network | A: Core (GameState, EventBus, Scene Loader); B: Network (Net, RPC, ENet) |
+| Devin-2 Director | A: Camera + Mana + Dispatcher; B: Wall/Door abilities; C: Light/Item/Monster abilities |
+| Devin-3 Player+Classes | A: FP Controller; B: 4 Classes |
+| Devin-6 World+Map | A: World system; B: Map 1 .tscn |
+| Devin-8 UI | A: Menu+Settings; B: Lobby; C: HUDs |
+| Devin-9 Audio | A: Audio Manager + SFX; B: Proximity Voice Chat |
 
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
+That's already 16+ slots. Plenty of room.
 
-Your task: Issue #10 — Build the World system: rooms, walls, doors, items, map loader.
+When splitting, **each split gets its own Issue and its own branch**. Coordinate naming via @team-lead.
 
-Scope (only edit src/world/):
-1. src/world/world.gd — autoload "World" with public interface from architecture.md
-2. src/world/room.gd — Node3D with bounding box, list of doors, lights
-3. src/world/wall.gd — Node3D, supports "movable" flag for Director's wall-move
-4. src/world/door.gd — Node3D, has "leads_to_room_id" property, can be locked/unlocked, swappable
-5. src/world/item.gd — pickup-able, has type (artifact, key, weapon, consumable)
-6. src/world/map_loader.gd — loads "Map 1: The Childhood Home" from a .tres or .tscn
-7. Tests for World.swap_doors() and World.create_door()
+## When 2 sessions need to work together
 
-Map 1 ("The Childhood Home") layout: 2-floor Victorian house, ~12 rooms. Use placeholder cubes for walls. Real geometry comes later.
+Use the `needs-pair` label. Team Lead will:
+1. Assign one session as primary (their branch)
+2. Assign one as secondary (commits via PR to primary's branch)
+3. Both watch the same Issue and update progress in comments
 
-When done: PR "[#10] World system + Map 1 layout (placeholder)" → dev.
+## Suggested order for starting sessions
 
-If blocked: comment on Issue #10.
-```
+When you open 10 Devin tabs and want minimum chaos:
 
----
+| Order | Session | Why |
+|---|---|---|
+| 1 | TEAM LEAD | Start first so it's reviewing as others land |
+| 2 | Devin-1 (Core+Net) | Foundation, others stub off its interfaces |
+| 3 | Devin-6 (World) | Needed by Director (#2) and Map |
+| 4-10 | Devin-2..9 in parallel | Once Core and World basics land |
 
-## Prompt 11 — Devin-11 (Shaders + visual style)
-
-```
-You are Devin-11 working on the DIRECTOR game.
-
-Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-11/issue-11-shaders
-
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
-
-Your task: Issue #11 — Build the cel-shading + outline + fog visual style. Reference: REPO, PEAK, Inscryption.
-
-Scope (only edit src/shaders/):
-1. src/shaders/cel_shading.gdshader — toon-shading shader (hard light/shadow threshold, 2 levels)
-2. src/shaders/outline.gdshader — black silhouette outline (post-process, depth/normal-based)
-3. src/shaders/volumetric_fog.gdshader — atmospheric fog (configurable density per scene)
-4. src/shaders/test_scene.tscn — a small scene showing all 3 effects on placeholder objects
-5. Document parameters in a comment block at the top of each shader
-
-Visual target: muted base palette + 1 strong accent per scene. See GDD §9.
-
-When done: PR "[#11] Cel-shading + outline + fog shaders" → dev.
-
-If blocked: comment on Issue #11.
-```
+Or just open them all at once — the system is designed for chaos.
 
 ---
 
-## Prompt 12 — Devin-12 (UI: Lobby + Menus)
-
-```
-You are Devin-12 working on the DIRECTOR game.
-
-Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-12/issue-12-lobby-menus
-
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
-
-Your task: Issue #12 — Build main menu and lobby UI.
-
-Scope (only edit src/ui/lobby/ and src/ui/menu/):
-1. src/ui/menu/main_menu.tscn — Play / Settings / Credits / Quit
-2. src/ui/menu/settings.tscn — graphics, audio, controls (basic)
-3. src/ui/lobby/lobby_browser.tscn — list of public lobbies (mock data ok for now)
-4. src/ui/lobby/lobby_room.tscn — pre-match: see other 4 players, pick Escapist class (or be auto-Director), ready button
-5. Wire to Net.host_match() / Net.join_match() (Devin-2's API)
-6. Style: dark theme, sans-serif font, minimal — match the game's mood
-
-When done: PR "[#12] Lobby + main menu UI" → dev.
-
-If blocked: comment on Issue #12.
-```
-
----
-
-## Prompt 13 — Devin-13 (UI: HUD + in-game)
-
-```
-You are Devin-13 working on the DIRECTOR game.
-
-Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-13/issue-13-hud
-
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
-
-Your task: Issue #13 — Build in-game HUDs for both Director and Escapist.
-
-Scope (only edit src/ui/hud/):
-1. src/ui/hud/director_hud.tscn — top-down view overlay: mana bar, ability bar (8 buttons), monster panel, player dots
-2. src/ui/hud/escapist_hud.tscn — first-person overlay: stamina bar, flashlight battery, inventory (3 slots), class ability cooldown
-3. src/ui/hud/match_overlay.tscn — match timer, artifact counter, post-match scoreboard
-4. Wire to GameState signals (match_started, match_ended) and Director.mana_changed
-
-Style: minimalist, semi-transparent black backgrounds, white text, single accent color per HUD type (red for Director, cyan for Escapist).
-
-When done: PR "[#13] In-game HUDs" → dev.
-
-If blocked: comment on Issue #13.
-```
-
----
-
-## Prompt 14 — Devin-14 (Audio + proximity chat)
-
-```
-You are Devin-14 working on the DIRECTOR game.
-
-Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-14/issue-14-audio
-
-Read AGENTS.md, docs/GDD.md, docs/architecture.md.
-
-Your task: Issue #14 — Build audio system and proximity voice chat.
-
-Scope (only edit src/audio/):
-1. src/audio/audio.gd — autoload "Audio" with public interface from architecture.md
-2. src/audio/sfx_pool.gd — pooled AudioStreamPlayer3D for SFX
-3. src/audio/music_player.gd — looping ambient music with crossfade
-4. src/audio/proximity_chat.gd — voice capture from microphone, broadcast to nearby peers via Net RPC, decode and play 3D-positioned. The Director hears all.
-5. Use Godot's built-in AudioServer + AudioEffectCapture for voice. Steam Voice integration is a later Issue.
-6. Placeholder SFX and music — use https://freesound.org or a single dark drone for now (CC0).
-
-When done: PR "[#14] Audio + proximity chat (basic)" → dev.
-
-If blocked: comment on Issue #14.
-```
-
----
-
-## How to use these prompts
-
-1. **Open 14 separate Devin sessions** — one per Devin account.
-2. **For each session**, copy the corresponding prompt above (#1 through #14).
-3. **Hit Send / Start.**
-4. Devin will read the repo, find its module, start working.
-5. **Wait 30–90 minutes**, then go to GitHub → see 14 open Pull Requests.
-6. **Review each PR.** Merge if good. Comment if not.
-7. After all 14 are merged, you have a working vertical slice skeleton.
-
-## What the Devin sessions WILL do automatically
-
-- Read AGENTS.md, GDD, architecture.md
-- Find their assigned Issue
-- Create the right branch
-- Write code in their assigned folder
-- Run tests
-- Open a PR with the right title and description
-- Wait for review
-
-## What the Devin sessions WILL NOT do
-
-- Edit other modules' folders
-- Merge their own PRs
-- Push directly to main or dev
-- Skip CI
-
-## What the project lead (you) does
-
-- Review PRs (or have Devin-1 / a "tech lead" Devin do it first)
-- Merge approved PRs
-- Resolve conflicts when 2 PRs touch shared files (rare if everyone stays in their lane)
-- Update Issues / create new ones as work progresses
-- Run the game and playtest
-- Update GDD when you change design
-
-## When something breaks
-
-- Devin will leave a comment on the Issue: `BLOCKED: <reason> @plpla7386-web help`
-- You read it, decide what to do, and reply in the thread or in the Devin session
-
----
-
-**Good luck. Now go open 14 tabs.**
+**That's it. Open 10 tabs. Paste prompts. Watch the PRs roll in.**
