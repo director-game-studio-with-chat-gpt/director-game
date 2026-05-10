@@ -17,7 +17,7 @@ This file defines **who does what** and **how sessions help each other**.
 - **Tag:** `@team-lead` in PR / Issue comments.
 - **Prompt template:** see `docs/prompts.md` § Team Lead.
 
-### Devin-1 through Devin-9 — WORKERS (9 sessions)
+### Devin-1 through Devin-10 — WORKERS (10 sessions)
 Each worker owns one module. See module assignment in [architecture.md](architecture.md).
 
 | Worker | Module | Folder |
@@ -27,10 +27,11 @@ Each worker owns one module. See module assignment in [architecture.md](architec
 | Devin-3 | Player + Classes | `src/player/` |
 | Devin-4 | Monsters A (Worm + Mirror) | `src/monsters/worm/`, `src/monsters/mirror/` |
 | Devin-5 | Monsters B (Swarm + Tongue) | `src/monsters/swarm/`, `src/monsters/tongue/` |
-| Devin-6 | World + Map 1 | `src/world/`, `scenes/main/` |
+| Devin-6 | World system (runtime) | `src/world/` |
 | Devin-7 | Shaders + VFX | `src/shaders/` |
 | Devin-8 | UI (HUD + Lobby + Menu) | `src/ui/` |
 | Devin-9 | Audio + Proximity Chat | `src/audio/` |
+| Devin-10 | Map 1 — The Childhood Home | `scenes/main/`, `src/assets/maps/` |
 
 ## Workflow
 
