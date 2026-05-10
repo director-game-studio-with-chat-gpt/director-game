@@ -18,11 +18,10 @@ For team-level rules (how to ask for help, paired work, escalation), see [team.m
 | **Devin-3** | **Player + Classes** (FP-controller + 4 classes) | `src/player/` | medium |
 | **Devin-4** | **Monsters A** (Worm + Mirror) | `src/monsters/worm/`, `src/monsters/mirror/`, `src/monsters/base_monster.gd` | medium |
 | **Devin-5** | **Monsters B** (Swarm + Tongue) | `src/monsters/swarm/`, `src/monsters/tongue/` | medium |
-| **Devin-6** | **World system (runtime)** (rooms, walls, doors, items, map loader) | `src/world/` | high |
+| **Devin-6** | **World + Map 1** (rooms, walls, doors, items, map loader) | `src/world/`, `scenes/main/` | high |
 | **Devin-7** | **Shaders + VFX** (cel-shading, outline, fog) | `src/shaders/` | medium |
 | **Devin-8** | **UI** (HUD + Lobby + Menu) | `src/ui/` | medium |
 | **Devin-9** | **Audio + Proximity Chat** | `src/audio/` | medium |
-| **Devin-10** | **Map 1 — The Childhood Home** (geometry, rooms, doors placement) | `scenes/main/`, `src/assets/maps/` | medium |
 
 **Plus shared:** `src/assets/` (anyone can add models/textures with attribution in `src/assets/SOURCES.md`)
 

@@ -8,7 +8,7 @@ This file is read **automatically** by every Devin session that opens this repo.
 
 We are building **DIRECTOR**: a 1v4 asymmetric PvP horror game in Godot 4 (3D). See [README.md](README.md) and [docs/GDD.md](docs/GDD.md) for full context.
 
-This project is built by **1 Team Lead + 10 worker Devin sessions** working in parallel, coordinated through GitHub. There is no real-time chat between sessions — all communication is through:
+This project is built by **1 Team Lead + 9 worker Devin sessions** working in parallel, coordinated through GitHub. There is no real-time chat between sessions — all communication is through:
 - GitHub Issues (your assigned tasks)
 - GitHub Pull Requests (your work + reviews)
 - Files in `/docs/` (shared knowledge)

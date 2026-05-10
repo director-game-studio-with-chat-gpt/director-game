@@ -1,19 +1,18 @@
-# 11 ready-to-paste prompts for Devin sessions
+# 10 ready-to-paste prompts for Devin sessions
 
-This is the **11-session structure**: 1 TEAM LEAD + 10 workers.
+This is the **10-session structure**: 1 TEAM LEAD + 9 workers.
 
-Open 11 Devin sessions (one per Devin account). Paste the matching prompt into each. Done.
+Open 10 Devin sessions (one per Devin account). Paste the matching prompt into each. Done.
 
-If you have **fewer than 11 accounts right now** — start with the most important ones first:
+If you have **fewer than 10 accounts right now** — start with the most important ones first:
 1. **TEAM LEAD** (always start this first — it's your right hand)
 2. **Devin-1 Core+Network** (everyone else depends on it)
-3. **Devin-6 World system** (Director and monsters need it)
-4. **Devin-10 Map 1** (depends on World system, can run in parallel)
-5. **Devin-2 Director** (high impact)
-6. **Devin-3 Player** (high impact)
-7. Then 4, 5, 7, 8, 9 in any order
+3. **Devin-6 World + Map 1** (no game without rooms)
+4. **Devin-2 Director** (high impact)
+5. **Devin-3 Player** (high impact)
+6. Then 4, 5, 7, 8, 9 in any order
 
-If you have **more than 11 accounts** — see the "Splitting big tasks" section at the bottom.
+If you have **more than 10 accounts** — see the "Splitting big tasks" section at the bottom.
 
 ---
 
@@ -274,40 +273,44 @@ If blocked: comment on Issue #5.
 
 ---
 
-## Prompt 6 — Devin-6 (World system)
+## Prompt 6 — Devin-6 (World + Map 1)
 
 ```
 You are Devin-6 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-6/issue-6-world-system
+Branch: devin-6/issue-6-world-map
 
 Read: AGENTS.md, docs/GDD.md (§8 Maps), docs/architecture.md, docs/team.md
 
-Your task: Issue #6 — World system (the engine that powers maps).
+Your task: Issue #6 — World system + Map 1 "The Childhood Home".
 
-You are split from the original "World + Map" task. Devin-10 is doing Map 1 geometry. You provide the runtime systems that maps use. Coordinate with Devin-10 in PR comments.
+HIGH complexity. If too big for one session, tag @team-lead for a paired worker.
 
-Scope (only edit src/world/):
+Scope (only edit src/world/ and scenes/main/):
 
-A. WORLD AUTOLOAD (src/world/)
+A. WORLD (src/world/)
 - Expand src/world/world.gd autoload with the full public interface in docs/architecture.md
-- Registry: known rooms, walls, doors, items
-- Public API: get_room_at(), get_door(), move_wall(), swap_doors(), create_door(), load_map()
-
-B. ENTITIES (src/world/)
-- src/world/room.gd — Node3D with bounding box, list of doors, list of lights, list of items, room id
-- src/world/wall.gd — Node3D, movable flag, animates Transform3D over duration when moved
+- src/world/room.gd — Node3D with bounding box, list of doors, list of lights, list of items
+- src/world/wall.gd — Node3D, movable flag, animates over duration when moved
 - src/world/door.gd — Node3D, leads_to_room_id property, lock state, can be swapped/created/destroyed
 - src/world/item.gd — pickup-able, type (artifact/key/weapon/consumable), drop interaction
-- src/world/artifact.gd — extends Item, has is_collected flag, emits "artifact_picked_up" event
-- src/world/map_loader.gd — loads a map .tscn, scans for rooms/walls/doors children, registers with World
+- src/world/artifact.gd — extends Item, has "is_collected" flag, emits "artifact_picked_up" event
+- src/world/map_loader.gd — loads a map .tscn into the scene, registers rooms/walls/doors with World
+
+B. MAP 1 (scenes/main/)
+- scenes/main/map_1_childhood_home.tscn — 2-floor Victorian, ~12 rooms (use placeholder cubes for walls)
+- Required rooms: Foyer (spawn), Kitchen, Living Room, Bedroom, Bathroom, Cellar, Attic, Garden, Hallway1, Hallway2, Stairwell, Main Exit Room
+- 3 artifact spawn points (random placement among non-spawn rooms)
+- 1 fixed Main Exit door
+
+Use simple geometry. No fancy models. Devin-7's shader gives the visual style.
 
 C. TESTS
-- test_world.gd: swap_doors correctness (A→B, B→A), create_door registers in World, move_wall transform interpolation over time
-- test_map_loader.gd: loads a tiny test map, registers expected number of rooms
+- test_world.gd: swap_doors correctness (A→B, B→A), create_door, move_wall transform interpolation
+- test_map_loader.gd: loads Map 1, has all required rooms
 
-When done: PR "[#6] World system (runtime)" → dev.
+When done: PR "[#6] World system + Map 1 (placeholder geometry)" → dev.
 
 If blocked: comment on Issue #6.
 ```
@@ -401,53 +404,6 @@ If blocked: comment on Issue #8.
 
 ---
 
-## Prompt 10 — Devin-10 (Map 1 — The Childhood Home)
-
-```
-You are Devin-10 working on the DIRECTOR game.
-
-Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-10/issue-10-map-1
-
-Read: AGENTS.md, docs/GDD.md (especially §8 Maps), docs/architecture.md, docs/team.md
-
-Your task: Issue #10 — Build Map 1 "The Childhood Home".
-
-You rely on Devin-6's World system. If Room/Wall/Door scripts don't exist yet:
-- Comment on Issue #6: "@devin-6 starting Map 1, need Room/Wall/Door scenes ASAP"
-- Continue with local stubs and replace before merging
-
-Scope (only edit scenes/main/ and add map assets to src/assets/maps/):
-
-A. MAP SCENE (scenes/main/)
-- scenes/main/map_1_childhood_home.tscn — 2-floor Victorian, ~12 rooms
-- Required rooms (use Room nodes from Devin-6):
-  * Floor 1: Foyer (spawn), Kitchen, Living Room, Cellar entrance, Garden, Hallway 1, Stairwell
-  * Floor 2: Bedroom, Bathroom, Attic entrance, Hallway 2, Main Exit room
-- Each room: 4 walls (Wall nodes), 1-3 doors (Door nodes), 1-2 lights (placeholder OmniLight3D)
-- 3 artifact spawn points (use Artifact node) in random non-Foyer rooms
-- 1 fixed Main Exit door in the Main Exit room
-- Use simple primitive geometry (CSGBox3D or MeshInstance3D with BoxMesh / PlaneMesh)
-- No fancy textures — Devin-7's shaders provide visual style
-
-B. MAP VALIDATION
-- Open the scene in Godot — no errors, no missing references
-- Press F5 → main scene loads → you can see the Foyer (camera placed there)
-- Walking around (use WASD camera in editor) — all rooms connected via doors
-
-C. ASSETS (src/assets/maps/)
-- If you use any CC0 textures or models — list them in src/assets/SOURCES.md
-
-D. TESTS
-- test_map_1.gd: World.load_map("map_1_childhood_home") succeeds and registers ≥12 rooms, ≥3 artifact spawn points, 1 main exit
-
-When done: PR "[#10] Map 1 — Childhood Home" → dev. Attach screenshots of each floor.
-
-If blocked: comment on Issue #10.
-```
-
----
-
 ## Prompt 9 — Devin-9 (Audio + Proximity Chat)
 
 ```
@@ -517,14 +473,14 @@ Use the `needs-pair` label. Team Lead will:
 
 ## Suggested order for starting sessions
 
-When you open 11 Devin tabs and want minimum chaos:
+When you open 10 Devin tabs and want minimum chaos:
 
 | Order | Session | Why |
 |---|---|---|
 | 1 | TEAM LEAD | Start first so it's reviewing as others land |
 | 2 | Devin-1 (Core+Net) | Foundation, others stub off its interfaces |
-| 3 | Devin-6 (World system) | Needed by Director (#2), monsters (#4/5), Map (#10) |
-| 4-11 | Devin-2..5, 7, 8, 9, 10 in parallel | Once Core and World basics land |
+| 3 | Devin-6 (World+Map) | Needed by Director (#2) and monsters (#4/5) |
+| 4-10 | Devin-2..5, 7, 8, 9 in parallel | Once Core and World basics land |
 
 Or just open them all at once — the system is designed for chaos.
 
