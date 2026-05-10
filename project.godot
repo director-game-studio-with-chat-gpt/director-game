@@ -1,0 +1,39 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Director"
+config/description="1v4 asymmetric PvP horror — one player IS the house"
+config/version="0.1.0"
+run/main_scene="res://scenes/main/main.tscn"
+config/features=PackedStringArray("4.4", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://src/core/game_state.gd"
+EventBus="*res://src/core/event_bus.gd"
+Net="*res://src/network/net.gd"
+World="*res://src/world/world.gd"
+Director="*res://src/director/director.gd"
+Audio="*res://src/audio/audio.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+environment/defaults/default_clear_color=Color(0.0509804, 0.0588235, 0.0666667, 1)

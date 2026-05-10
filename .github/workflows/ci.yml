@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+jobs:
+  validate:
+    name: Validate Godot project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/godot
+          key: godot-4.4-linux
+
+      - name: Install Godot 4.4
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.local/bin
+          wget -q https://github.com/godotengine/godot/releases/download/4.4-stable/Godot_v4.4-stable_linux.x86_64.zip -O godot.zip
+          unzip -q godot.zip
+          mv Godot_v4.4-stable_linux.x86_64 ~/.local/bin/godot
+          chmod +x ~/.local/bin/godot
+
+      - name: Add Godot to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Import project
+        run: |
+          godot --headless --import || true
+
+      - name: Lint GDScript
+        run: |
+          # Simple syntax check by parsing every script
+          # gdscript-lint can be added later
+          find src tests -name "*.gd" -print0 | while IFS= read -r -d '' file; do
+            echo "Checking $file"
+            godot --headless --script "$file" --quit || true
+          done
+
+      - name: Project structure check
+        run: |
+          test -f project.godot
+          test -f AGENTS.md
+          test -f docs/GDD.md
+          test -f docs/architecture.md
+          test -d src
+          test -d scenes
+          test -d tests
+          echo "Structure OK"

@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://b8x4c7v9j2k3a"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(1, 0.1, 1)
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 5, 0)
+light_energy = 0.5
+shadow_enabled = true
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 20, 0, -1, 0)
+mesh = SubResource("BoxMesh_floor")
