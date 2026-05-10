@@ -16,10 +16,12 @@ If you have **more than 10 accounts** — see the "Splitting big tasks" section 
 
 ---
 
-## ⭐ Prompt L — TEAM LEAD (run this FIRST, keep it running)
+## ⭐ Prompt L — TEAM LEAD (Issue #1 — run this FIRST, keep it running)
 
 ```
 You are the TEAM LEAD for the DIRECTOR game project. You are special — you do NOT work on a specific module. Your job is to coordinate and review the other 9 Devin workers.
+
+Your home is Issue #1 (this is the meta-issue for the Team Lead role).
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
 
@@ -75,11 +77,11 @@ Begin by reading the 4 docs above, then check repo state and open status.md with
 You are Devin-1 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-1/issue-1-core-network
+Branch: devin-1/issue-2-core-network
 
 Read: AGENTS.md, docs/GDD.md, docs/architecture.md, docs/team.md, docs/prompts.md
 
-Your task: Issue #1 — Core + Network systems.
+Your task: Issue #2 — Core + Network systems.
 
 This is a HIGH-complexity task because it's foundational. Other workers depend on you. If you need help — tag @team-lead and request a paired session.
 
@@ -103,9 +105,9 @@ C. TESTS (tests/)
 - test_event_bus.gd: emit/listen/disconnect, no leaks.
 - test_net.gd: mock 1 host + 2 clients, test RPC round-trip.
 
-When done: open PR "[#1] Core + Network systems" → dev branch. Wait for @team-lead review.
+When done: open PR "[#2] Core + Network systems" → dev branch. Wait for @team-lead review.
 
-If blocked: comment on Issue #1 with "BLOCKED: <reason> @team-lead help".
+If blocked: comment on Issue #2 with "BLOCKED: <reason> @team-lead help".
 ```
 
 ---
@@ -116,11 +118,11 @@ If blocked: comment on Issue #1 with "BLOCKED: <reason> @team-lead help".
 You are Devin-2 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-2/issue-2-director-systems
+Branch: devin-2/issue-3-director-systems
 
 Read: AGENTS.md, docs/GDD.md (especially §4 Director gameplay), docs/architecture.md, docs/team.md
 
-Your task: Issue #2 — Complete Director Systems (camera, mana, ALL 8 abilities).
+Your task: Issue #3 — Complete Director Systems (camera, mana, ALL 8 abilities).
 
 This is HIGH complexity. If you find this is too much for one session, tag @team-lead and request a paired worker.
 
@@ -146,9 +148,9 @@ C. TESTS
 - test_director_cooldowns.gd: each ability respects its cooldown.
 - test_director_abilities.gd: at least 1 test per ability (happy path).
 
-When done: PR "[#2] Director systems — camera, mana, 8 abilities" → dev.
+When done: PR "[#3] Director systems — camera, mana, 8 abilities" → dev.
 
-If blocked: comment "BLOCKED: ... @team-lead help" on Issue #2.
+If blocked: comment "BLOCKED: ... @team-lead help" on Issue #3.
 ```
 
 ---
@@ -159,11 +161,11 @@ If blocked: comment "BLOCKED: ... @team-lead help" on Issue #2.
 You are Devin-3 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-3/issue-3-player-classes
+Branch: devin-3/issue-4-player-classes
 
 Read: AGENTS.md, docs/GDD.md (especially §5 Escapist gameplay and §6 classes), docs/architecture.md, docs/team.md
 
-Your task: Issue #3 — First-person Escapist controller + 4 classes.
+Your task: Issue #4 — First-person Escapist controller + 4 classes.
 
 Scope (only edit src/player/):
 
@@ -188,9 +190,9 @@ C. TESTS
 - test_inventory.gd: 3-slot limit, drop, use
 - test_classes.gd: 1 test per class ability (cooldown + effect signal)
 
-When done: PR "[#3] Player FP controller + 4 classes" → dev.
+When done: PR "[#4] Player FP controller + 4 classes" → dev.
 
-If blocked: comment on Issue #3.
+If blocked: comment on Issue #4.
 ```
 
 ---
@@ -201,11 +203,11 @@ If blocked: comment on Issue #3.
 You are Devin-4 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-4/issue-4-monsters-a
+Branch: devin-4/issue-5-monsters-a
 
 Read: AGENTS.md, docs/GDD.md §7, docs/architecture.md, docs/team.md
 
-Your task: Issue #4 — Base Monster class + Worm + Mirror.
+Your task: Issue #5 — Base Monster class + Worm + Mirror.
 
 You own src/monsters/base_monster.gd which Devin-5 will also extend. Coordinate via PR comments if you need to talk to Devin-5.
 
@@ -229,9 +231,9 @@ D. TESTS
 - test_worm.gd: Worm steals dropped artifact, dies in light.
 - test_mirror.gd: Mirror mirrors movement, dies in 1 hit.
 
-When done: PR "[#4] Monsters: Base + Worm + Mirror" → dev.
+When done: PR "[#5] Monsters: Base + Worm + Mirror" → dev.
 
-If blocked: comment on Issue #4.
+If blocked: comment on Issue #5.
 ```
 
 ---
@@ -242,14 +244,14 @@ If blocked: comment on Issue #4.
 You are Devin-5 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-5/issue-5-monsters-b
+Branch: devin-5/issue-6-monsters-b
 
 Read: AGENTS.md, docs/GDD.md §7, docs/architecture.md, docs/team.md
 
-Your task: Issue #5 — Swarm + Tongue monsters.
+Your task: Issue #6 — Swarm + Tongue monsters.
 
 You rely on src/monsters/base_monster.gd which Devin-4 is writing. If it doesn't exist yet:
-- Open a comment on Issue #4: "@devin-4 I'm starting Issue #5, need BaseMonster ASAP."
+- Open a comment on Issue #5: "@devin-4 I'm starting Issue #6, need BaseMonster ASAP."
 - Continue working with a local stub of BaseMonster — replace with the real one in your PR before merging.
 
 Scope (only edit src/monsters/, BUT only swarm/ + tongue/):
@@ -266,9 +268,9 @@ C. TESTS
 - test_swarm.gd: visibility drop, wind disperses.
 - test_tongue.gd: triggers on programmed door, grabs at 4m, retracts on knife hit.
 
-When done: PR "[#5] Monsters: Swarm + Tongue" → dev.
+When done: PR "[#6] Monsters: Swarm + Tongue" → dev.
 
-If blocked: comment on Issue #5.
+If blocked: comment on Issue #6.
 ```
 
 ---
@@ -279,11 +281,11 @@ If blocked: comment on Issue #5.
 You are Devin-6 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-6/issue-6-world-map
+Branch: devin-6/issue-7-world-map
 
 Read: AGENTS.md, docs/GDD.md (§8 Maps), docs/architecture.md, docs/team.md
 
-Your task: Issue #6 — World system + Map 1 "The Childhood Home".
+Your task: Issue #7 — World system + Map 1 "The Childhood Home".
 
 HIGH complexity. If too big for one session, tag @team-lead for a paired worker.
 
@@ -310,9 +312,9 @@ C. TESTS
 - test_world.gd: swap_doors correctness (A→B, B→A), create_door, move_wall transform interpolation
 - test_map_loader.gd: loads Map 1, has all required rooms
 
-When done: PR "[#6] World system + Map 1 (placeholder geometry)" → dev.
+When done: PR "[#7] World system + Map 1 (placeholder geometry)" → dev.
 
-If blocked: comment on Issue #6.
+If blocked: comment on Issue #7.
 ```
 
 ---
@@ -323,11 +325,11 @@ If blocked: comment on Issue #6.
 You are Devin-7 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-7/issue-7-shaders
+Branch: devin-7/issue-8-shaders
 
 Read: AGENTS.md, docs/GDD.md §9 (Visual style), docs/architecture.md, docs/team.md
 
-Your task: Issue #7 — Cel-shading + outline + fog visual style.
+Your task: Issue #8 — Cel-shading + outline + fog visual style.
 
 References: REPO, PEAK, Inscryption, Lethal Company, Coraline (movie).
 
@@ -357,9 +359,9 @@ E. DOCUMENTATION
 F. TESTS
 - Skip — shaders are visually tested via test_scene.tscn
 
-When done: PR "[#7] Cel-shading + outline + fog" → dev. Attach screenshots.
+When done: PR "[#8] Cel-shading + outline + fog" → dev. Attach screenshots.
 
-If blocked: comment on Issue #7.
+If blocked: comment on Issue #8.
 ```
 
 ---
@@ -370,11 +372,11 @@ If blocked: comment on Issue #7.
 You are Devin-8 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-8/issue-8-ui
+Branch: devin-8/issue-9-ui
 
 Read: AGENTS.md, docs/GDD.md (§4 Director UI, §5 Escapist UI), docs/architecture.md, docs/team.md
 
-Your task: Issue #8 — All UI scenes: main menu, lobby, in-game HUD.
+Your task: Issue #9 — All UI scenes: main menu, lobby, in-game HUD.
 
 Scope (only edit src/ui/):
 
@@ -397,9 +399,9 @@ Style: dark theme, white text, accent red (Director) / cyan (Escapist). Sans-ser
 D. TESTS
 - Skip integration tests (UI tested visually). Add basic unit tests for state binding (signals fire UI updates).
 
-When done: PR "[#8] UI: menus + lobby + HUDs" → dev. Attach screenshots.
+When done: PR "[#9] UI: menus + lobby + HUDs" → dev. Attach screenshots.
 
-If blocked: comment on Issue #8.
+If blocked: comment on Issue #9.
 ```
 
 ---
@@ -410,11 +412,11 @@ If blocked: comment on Issue #8.
 You are Devin-9 working on the DIRECTOR game.
 
 Repo: https://github.com/director-game-studio-with-chat-gpt/director-game
-Branch: devin-9/issue-9-audio
+Branch: devin-9/issue-10-audio
 
 Read: AGENTS.md, docs/GDD.md §10 (Audio), docs/architecture.md, docs/team.md
 
-Your task: Issue #9 — Audio system + proximity voice chat.
+Your task: Issue #10 — Audio system + proximity voice chat.
 
 Scope (only edit src/audio/):
 
@@ -440,9 +442,9 @@ D. TESTS
 - test_audio.gd: SFX pool doesn't leak, music crossfade works
 - test_proximity_chat.gd: voice falloff at 5m, Director hears all
 
-When done: PR "[#9] Audio + proximity chat (basic)" → dev.
+When done: PR "[#10] Audio + proximity chat (basic)" → dev.
 
-If blocked: comment on Issue #9.
+If blocked: comment on Issue #10.
 ```
 
 ---
