@@ -9,7 +9,13 @@ Track every external asset here. Required for license compliance and crediting i
 
 ## Models
 
-(none yet)
+(none yet — Map 1 uses procedurally generated placeholder boxes)
+
+## Plugins / addons
+
+| Asset path | Source URL | License | Notes |
+|---|---|---|---|
+| `addons/gut/` | https://github.com/bitwes/Gut | MIT | GUT v9.4.0 (Godot Unit Test). 9.5+ requires Godot 4.5; we pin 9.4.0 for Godot 4.4 compat. |
 
 ## Textures
 
