@@ -16,6 +16,12 @@ var _walls_by_id: Dictionary = {}
 var _items_by_id: Dictionary = {}
 var _current_map: Node3D = null
 var _current_map_name: String = ""
+# Tracks the in-flight `wall.moved` callback per wall_id so a second
+# `move_wall` call on the same wall can disconnect the previous one-shot
+# before starting a new tween. Without this, stale callbacks accumulate
+# (each `.bind(wall_id)` produces a distinct Callable) and `wall_moved`
+# would fire once per accumulated callback when the latest tween finishes.
+var _pending_wall_callbacks: Dictionary = {}
 
 func _ready() -> void:
 	pass
@@ -75,7 +81,10 @@ func move_wall(wall_id: String, new_transform: Transform3D, duration: float) -> 
 		push_warning("World.move_wall: unknown wall '%s'" % wall_id)
 		return
 	if wall is Node3D and wall.has_method("animate_to_transform") and wall.has_signal("moved"):
-		wall.moved.connect(_on_wall_moved.bind(wall_id), CONNECT_ONE_SHOT)
+		_disconnect_pending_wall_callback(wall, wall_id)
+		var cb: Callable = _on_wall_moved.bind(wall_id)
+		_pending_wall_callbacks[wall_id] = cb
+		wall.moved.connect(cb, CONNECT_ONE_SHOT)
 		wall.animate_to_transform(new_transform, duration)
 		return
 	if wall is Node3D:
@@ -83,7 +92,16 @@ func move_wall(wall_id: String, new_transform: Transform3D, duration: float) -> 
 	wall_moved.emit(wall_id)
 
 func _on_wall_moved(_new_transform: Transform3D, wall_id: String) -> void:
+	_pending_wall_callbacks.erase(wall_id)
 	wall_moved.emit(wall_id)
+
+func _disconnect_pending_wall_callback(wall: Node, wall_id: String) -> void:
+	if not _pending_wall_callbacks.has(wall_id):
+		return
+	var old_cb: Callable = _pending_wall_callbacks[wall_id]
+	if wall.has_signal("moved") and wall.moved.is_connected(old_cb):
+		wall.moved.disconnect(old_cb)
+	_pending_wall_callbacks.erase(wall_id)
 
 ## Swaps the destinations of two existing doors. Each door records which room
 ## it leads to; after this call door A leads where door B used to lead and

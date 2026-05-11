@@ -73,6 +73,32 @@ func test_move_wall_unknown_id_warns_no_crash() -> void:
 	World.move_wall("does_not_exist", Transform3D.IDENTITY, 0.0)
 	assert_eq(World.get_wall("does_not_exist"), null, "Unknown wall stays unregistered")
 
+func test_move_wall_called_twice_emits_only_once() -> void:
+	# Regression: calling move_wall on the same wall while a tween is still
+	# in progress used to accumulate stale CONNECT_ONE_SHOT callbacks; when
+	# the latest tween completed, wall_moved fired once per accumulated call.
+	var wall: StaticBody3D = StaticBody3D.new()
+	wall.set_script(WallScript)
+	wall.name = "Wall_double"
+	wall.set("wall_id", "wall_double")
+	add_child_autofree(wall)
+	World.register_wall(wall)
+
+	var fired: Array[String] = []
+	World.wall_moved.connect(func(id: String) -> void: fired.append(id))
+	var t1: Transform3D = Transform3D(Basis.IDENTITY, Vector3(3, 0, 0))
+	var t2: Transform3D = Transform3D(Basis.IDENTITY, Vector3(7, 0, 0))
+	World.move_wall("wall_double", t1, 0.1)
+	# Re-issue while the first tween is still mid-air.
+	World.move_wall("wall_double", t2, 0.1)
+	assert_eq(fired.size(), 0, "neither call has completed yet")
+	await get_tree().create_timer(0.25).timeout
+	assert_eq(fired.size(), 1,
+		"wall_moved must fire exactly once even when move_wall is re-issued mid-tween")
+	assert_eq(fired[0], "wall_double")
+	assert_eq(wall.transform.origin, t2.origin,
+		"second target wins; transform reflects latest call")
+
 func test_move_wall_with_duration_emits_after_completion() -> void:
 	var wall: StaticBody3D = StaticBody3D.new()
 	wall.set_script(WallScript)
