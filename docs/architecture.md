@@ -136,12 +136,35 @@ If Devin-5 starts work and `base_monster.gd` doesn't exist yet, create a stub an
 **Autoload:** `World`
 
 ```gdscript
+# Queries — return null if not found.
 World.get_room_at(position: Vector3) -> Room
+World.get_room(room_id: String) -> Room
 World.get_door(door_id: String) -> Door
+World.get_wall(wall_id: String) -> Wall
+World.get_item(item_id: String) -> Item
+
+# Enumeration — returns array of string ids.
+World.list_rooms() -> Array
+World.list_doors() -> Array
+World.list_walls() -> Array
+
+# Mutations — used by Director module.
 World.move_wall(wall_id: String, new_transform: Transform3D, duration: float) -> void
 World.swap_doors(door_a_id: String, door_b_id: String) -> void
 World.create_door(wall_id: String, position: Vector3, leads_to_room_id: String) -> Door
-World.load_map(map_name: String) -> void
+
+# Map lifecycle.
+World.load_map(map_name: String) -> bool       # true on success
+World.unload_map() -> void
+World.get_current_map() -> Node3D              # null if no map loaded
+World.get_current_map_name() -> String         # "" if no map loaded
+
+# Registration helpers — called by map scripts to register procedurally-built
+# rooms / walls / doors / items so other modules can find them.
+World.register_room(room: Node) -> void
+World.register_wall(wall: Node) -> void
+World.register_door(door: Node) -> void
+World.register_item(item: Node) -> void
 
 # Signals
 World.wall_moved(wall_id: String)
@@ -149,7 +172,16 @@ World.door_created(door_id: String)
 World.map_loaded(map_name: String)
 ```
 
-Devin-6 also delivers **Map 1: The Childhood Home** as a `.tscn` in `scenes/main/`.
+**Classes** (in `src/world/`):
+- `class_name Room extends Node3D` — has `room_id`, `display_name`, `half_extents`, `is_fixed`, `contains_point(Vector3) -> bool`.
+- `class_name Wall extends StaticBody3D` — has `wall_id`, `is_movable`, `animate_to_transform(t, duration)`.
+- `class_name Door extends Node3D` — has `door_id`, `room_a_id`, `room_b_id`, `leads_to_room_id`, `is_locked`, `is_main_exit`, methods `open()`, `close()`, `lock()`, `unlock()`, `get_leads_to()`, `set_leads_to(id)`.
+- `class_name Item extends Node3D` — base for pickups with `item_id`, `mark_picked_up(by)`, `mark_dropped(at)`.
+- `class_name Artifact extends Item` — `artifact_kind` ∈ `{"skull","photograph","key"}`.
+- `class_name MapLoader extends RefCounted` — static helpers `resolve_scene_path`, `map_exists`, `instantiate_map`, `list_known_maps`.
+- `class_name Map1ChildhoodHome extends Node3D` — `@tool` script that builds Map 1 procedurally.
+
+Devin-6 also delivers **Map 1: The Childhood Home** as a `.tscn` in `scenes/main/map_1_childhood_home.tscn`.
 
 ### `Shaders / VFX` (Devin-7)
 
