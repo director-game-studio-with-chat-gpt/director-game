@@ -73,6 +73,26 @@ func test_move_wall_unknown_id_warns_no_crash() -> void:
 	World.move_wall("does_not_exist", Transform3D.IDENTITY, 0.0)
 	assert_eq(World.get_wall("does_not_exist"), null, "Unknown wall stays unregistered")
 
+func test_move_wall_with_duration_emits_after_completion() -> void:
+	var wall: StaticBody3D = StaticBody3D.new()
+	wall.set_script(WallScript)
+	wall.name = "Wall_async"
+	wall.set("wall_id", "wall_async")
+	add_child_autofree(wall)
+	World.register_wall(wall)
+
+	var fired: Array[String] = []
+	World.wall_moved.connect(func(id: String) -> void: fired.append(id))
+	var target: Transform3D = Transform3D(Basis.IDENTITY, Vector3(9, 0, 0))
+	World.move_wall("wall_async", target, 0.1)
+
+	# wall_moved must NOT have fired yet — the tween is in progress.
+	assert_eq(fired.size(), 0, "wall_moved is deferred until tween completes")
+	await get_tree().create_timer(0.25).timeout
+	assert_eq(fired.size(), 1, "wall_moved fires after tween completes")
+	assert_eq(fired[0], "wall_async")
+	assert_eq(wall.transform.origin, target.origin)
+
 # ---------- Room contains_point ----------
 
 func test_room_contains_point() -> void:

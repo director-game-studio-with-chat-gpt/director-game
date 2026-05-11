@@ -66,16 +66,23 @@ func get_current_map() -> Node3D:
 	return _current_map
 
 ## Moves a wall to a new transform over `duration` seconds (linear).
-## The Director uses this for the "Move Wall" ability.
+## The Director uses this for the "Move Wall" ability. `wall_moved` is emitted
+## only after the animation actually completes — for `duration > 0` that's at
+## the end of the tween, not when this call returns.
 func move_wall(wall_id: String, new_transform: Transform3D, duration: float) -> void:
 	var wall: Node = get_wall(wall_id)
 	if wall == null:
 		push_warning("World.move_wall: unknown wall '%s'" % wall_id)
 		return
-	if wall is Node3D and wall.has_method("animate_to_transform"):
+	if wall is Node3D and wall.has_method("animate_to_transform") and wall.has_signal("moved"):
+		wall.moved.connect(_on_wall_moved.bind(wall_id), CONNECT_ONE_SHOT)
 		wall.animate_to_transform(new_transform, duration)
-	elif wall is Node3D:
+		return
+	if wall is Node3D:
 		(wall as Node3D).transform = new_transform
+	wall_moved.emit(wall_id)
+
+func _on_wall_moved(_new_transform: Transform3D, wall_id: String) -> void:
 	wall_moved.emit(wall_id)
 
 ## Swaps the destinations of two existing doors. Each door records which room
@@ -119,7 +126,10 @@ func create_door(wall_id: String, door_position: Vector3, leads_to_room_id: Stri
 	return door
 
 ## Loads a map by name. Map name should match a file in `scenes/main/`,
-## e.g. "map_1_childhood_home". Returns true on success.
+## e.g. "map_1_childhood_home". Returns true on success. Registration of the
+## map's rooms/doors/walls and the `map_loaded` signal are both deferred to
+## the map instance's `ready` signal — procedural maps (like Map 1) build
+## their geometry in `_ready()`, so we must wait until after that runs.
 func load_map(map_name: String) -> bool:
 	_clear_current_map()
 	var instance: Node3D = MapLoader.instantiate_map(map_name)
@@ -127,10 +137,15 @@ func load_map(map_name: String) -> bool:
 		return false
 	_current_map = instance
 	_current_map_name = map_name
-	get_tree().get_root().call_deferred("add_child", _current_map)
+	instance.ready.connect(_on_current_map_ready.bind(map_name), CONNECT_ONE_SHOT)
+	get_tree().get_root().call_deferred("add_child", instance)
+	return true
+
+func _on_current_map_ready(map_name: String) -> void:
+	if _current_map == null or not is_instance_valid(_current_map):
+		return
 	_register_map_contents(_current_map)
 	map_loaded.emit(map_name)
-	return true
 
 ## Removes the current map from the tree and clears all registries.
 func unload_map() -> void:

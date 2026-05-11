@@ -33,6 +33,37 @@ func test_instantiate_unknown_map_returns_null() -> void:
 	var inst: Node3D = MapLoader.instantiate_map("does_not_exist")
 	assert_eq(inst, null)
 
+# ---------- World.load_map integration ----------
+
+func test_world_load_map_registers_contents_before_signal() -> void:
+	World.reset()
+	var rooms_when_emitted: Array[int] = []
+	var doors_when_emitted: Array[int] = []
+	var names_emitted: Array[String] = []
+	World.map_loaded.connect(func(n: String) -> void:
+		names_emitted.append(n)
+		rooms_when_emitted.append(World.list_rooms().size())
+		doors_when_emitted.append(World.list_doors().size())
+	)
+
+	var ok: bool = World.load_map("map_1_childhood_home")
+	assert_true(ok, "load_map must succeed for a known map")
+
+	# load_map adds the instance via call_deferred; wait two frames so that
+	# add_child runs, _ready builds geometry, the ready signal propagates,
+	# and our handler runs.
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	assert_eq(names_emitted.size(), 1, "map_loaded fires exactly once")
+	assert_eq(names_emitted[0], "map_1_childhood_home")
+	assert_gt(rooms_when_emitted[0], 0,
+		"World registry must be populated by the time map_loaded fires")
+	assert_gt(doors_when_emitted[0], 0,
+		"World door registry must be populated by the time map_loaded fires")
+	assert_eq(World.list_rooms().size(), 12, "Map 1 declares 12 rooms")
+	World.unload_map()
+
 # ---------- Map 1 content sanity ----------
 
 func test_map_1_has_12_rooms() -> void:
